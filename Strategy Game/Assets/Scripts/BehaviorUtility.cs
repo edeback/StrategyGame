@@ -33,7 +33,7 @@ public class BehaviorUtility
 
 		foreach (BasePiece b in player.ReadBases())
 		{
-			if(b.BaseLevel < BasePiece.MaxBaseLevel && (b.UpgradeProgress + b.NumUnitsInOrbit) >= BasePiece.UnitsToLevel)
+			if(b.BaseLevel < BasePiece.MaxBaseLevel && (b.UpgradeProgress + b.NumUnitsInOrbit) >= (BasePiece.UnitsToLevel + Behavior.ReserveUnits))
 			{
 				// Give slight precedence to those with more units in orbit
 				upgradableBases.Add(b, BasePiece.UnitsToLevel - b.UpgradeProgress - b.NumUnitsInOrbit / 100);

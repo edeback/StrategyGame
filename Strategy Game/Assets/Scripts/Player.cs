@@ -27,6 +27,34 @@ public class Player
 		unitsInOrbit = new Dictionary<BasePiece, List<UnitPiece>>();
 	}
 
+    ~Player()
+    {
+        units.Clear();
+        unitsToAdd.Clear();
+        bases.Clear();
+        unitsInOrbit.Clear();
+    }
+
+    public void DeInit()
+    {
+        foreach(var unit in units)
+        {
+            unit.DeInit();
+        }
+        units.Clear();
+        foreach(var unitToAdd in unitsToAdd)
+        {
+            unitToAdd.DeInit();
+        }
+        unitsToAdd.Clear();
+        foreach(var b in bases)
+        {
+            b.DeInit();
+        }
+        bases.Clear();
+        unitsInOrbit.Clear();
+    }
+
 	// Use this for initialization
 	void Start()
 	{

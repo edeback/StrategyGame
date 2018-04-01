@@ -7,7 +7,12 @@ public class Behavior {
 	private Player player;
 	private int ticksSinceLastUpdate;
 
-	public Behavior(Player player)
+    public static int ReserveUnits = 5;
+
+    Dictionary<BasePiece, List<UnitPiece>> defendingUnits;
+    Dictionary<BasePiece, List<UnitPiece>> attackingUnits;
+
+    public Behavior(Player player)
 	{
 		this.player = player;
 	}

@@ -97,6 +97,12 @@ public class UnitPiece : GamePiece
 		{
 			if (CurrentLocation != null)
 			{
+                // If too close, push out a bit
+                Vector2 outVector = GetPosition() - CurrentLocation.GetPosition();
+                if (Vector2.SqrMagnitude(outVector) < CurrentLocation.OrbitDistance * CurrentLocation.OrbitDistance)
+                {
+                    representation.transform.position += new Vector3(outVector.x, outVector.y, 0) / 15;
+                }
 				// Orbit
 				representation.transform.RotateAround(CurrentLocation.GetPosition(), Vector3.forward, 60 * deltaTime);
 			}

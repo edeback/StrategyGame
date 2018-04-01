@@ -31,6 +31,12 @@ public class GamePiece
 		destroyed = false;
 	}
 
+    ~GamePiece()
+    {
+        if (representation)
+            Object.Destroy(representation);
+    }
+
 	public Vector2 GetPosition()
 	{
 		return (Vector2)representation.transform.position;
@@ -46,8 +52,9 @@ public class GamePiece
 
 	public void DeInit()
 	{
-		Object.Destroy(representation);
-	}
+        if (representation)
+            Object.Destroy(representation);
+    }
 
 	// Use this for initialization
 	void Start()

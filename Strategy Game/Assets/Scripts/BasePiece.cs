@@ -55,6 +55,14 @@ public class BasePiece : GamePiece
 		}
 	}
 
+    public float OrbitDistance
+    {
+        get
+        {
+            return Size * ((baseLevel - 1.0f) / 9.0f + 1.0f);
+        }
+    }
+
 	public BasePiece(Player p, GameObject obj)
 		: base(p, obj)
 	{
@@ -114,7 +122,7 @@ public class BasePiece : GamePiece
 
 	public Vector2 GetRandomPointAroundBase()
 	{
-		return GetPosition() + GetRandomPointOnUnitCircle() * Size * ((baseLevel - 1.0f) / 9.0f + 1.0f);
+		return GetPosition() + GetRandomPointOnUnitCircle() * OrbitDistance;
 	}
 
 	private static Vector2 GetRandomPointOnUnitCircle()

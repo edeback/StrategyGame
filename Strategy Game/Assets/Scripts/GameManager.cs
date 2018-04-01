@@ -11,23 +11,36 @@ public struct PlayerData
 
 public class GameManager : MonoBehaviour {
 
-	public Level level;
+	private Level level;
 	public GameObject baseObject;
 	public GameObject unitObject;
 	public PlayerData[] playerDatas;
 	public float pixelScale;
 	public static GameManager manager;
+    public GameObject victoryScreen;
+    public GameObject lossScreen;
 
 	private Dictionary<int, Player> playerDictionary;
+    private bool doUpdate;
 
 	// Use this for initialization
 	void Start () {
 		manager = this;
-		LoadLevel();
+        doUpdate = false;
+		//LoadLevel();
 	}
+
+    public void StartGame(Level level)
+    {
+        this.level = level;
+        LoadLevel();
+        doUpdate = true;
+    }
 	
 	// Update is called once per frame
 	void Update () {
+        if (!doUpdate)
+            return;
 		foreach(var player in playerDictionary)
 		{
 			player.Value.Update(Time.deltaTime);
@@ -36,6 +49,7 @@ public class GameManager : MonoBehaviour {
 		{
 			player.Value.PostUpdate();
 		}
+        DetermineVictory();
 	}
 
 	void LoadLevel()
@@ -90,6 +104,46 @@ public class GameManager : MonoBehaviour {
 
 		return opponents;
 	}
+
+    void DetermineVictory()
+    {
+        int numPlayersWithBases = 0;
+        bool humanHasBases = false;
+        foreach (var player in playerDictionary)
+        {
+            if (player.Value.isNeutral)
+                continue;
+
+            if (player.Value.ReadBases().Count > 0)
+            {
+                numPlayersWithBases++;
+                if (player.Value.isHuman)
+                    humanHasBases = true;
+            }
+        }
+        if(!humanHasBases)
+        {
+            Debug.Log("Human loses!");
+            EndGame();
+        }
+        else if(numPlayersWithBases == 1)
+        {
+            Debug.Log("Human wins!");
+            EndGame();
+        }
+    }
+
+    void EndGame()
+    {
+        doUpdate = false;
+        foreach(var player in playerDictionary.Values)
+        {
+            player.DeInit();
+        }
+        playerDictionary.Clear();
+        if (victoryScreen)
+            victoryScreen.SetActive(true);
+    }
 
 	public static void SwapBase(BasePiece b, Player originalPlayer, Player newPlayer)
 	{
