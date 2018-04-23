@@ -9,9 +9,6 @@ public class Behavior {
 
     public static int ReserveUnits = 5;
 
-    Dictionary<BasePiece, List<UnitPiece>> defendingUnits;
-    Dictionary<BasePiece, List<UnitPiece>> attackingUnits;
-
     public Behavior(Player player)
 	{
 		this.player = player;
