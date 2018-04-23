@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 [System.Serializable]
 public struct PlayerData
@@ -19,22 +20,31 @@ public class GameManager : MonoBehaviour {
 	public static GameManager manager;
     public GameObject victoryScreen;
     public GameObject lossScreen;
+	public GameObject inGameUI;
+	public Material defaultMaterial;
 
 	private Dictionary<int, Player> playerDictionary;
     private bool doUpdate;
+	private StatisticsRecorder statisticsRecorder;
+	private float startTime;
 
 	// Use this for initialization
 	void Start () {
 		manager = this;
         doUpdate = false;
-		//LoadLevel();
+		statisticsRecorder = new StatisticsRecorder(defaultMaterial);
+		startTime = 0f;
 	}
 
     public void StartGame(Level level)
     {
         this.level = level;
         LoadLevel();
+		statisticsRecorder.Reset(playerDictionary);
         doUpdate = true;
+		startTime = Time.time;
+		if(inGameUI)
+			inGameUI.SetActive(true);
     }
 	
 	// Update is called once per frame
@@ -49,6 +59,7 @@ public class GameManager : MonoBehaviour {
 		{
 			player.Value.PostUpdate();
 		}
+		statisticsRecorder.Update(playerDictionary);
         DetermineVictory();
 	}
 
@@ -124,16 +135,16 @@ public class GameManager : MonoBehaviour {
         if(!humanHasBases)
         {
             Debug.Log("Human loses!");
-            EndGame();
+            EndGame(false);
         }
         else if(numPlayersWithBases == 1)
         {
             Debug.Log("Human wins!");
-            EndGame();
+            EndGame(true);
         }
     }
 
-    void EndGame()
+    public void EndGame(bool won)
     {
         doUpdate = false;
         foreach(var player in playerDictionary.Values)
@@ -141,14 +152,35 @@ public class GameManager : MonoBehaviour {
             player.DeInit();
         }
         playerDictionary.Clear();
-        if (victoryScreen)
-            victoryScreen.SetActive(true);
+		statisticsRecorder.Render();
+		if (inGameUI)
+			inGameUI.SetActive(false);
+        if (won)
+		{
+			victoryScreen.GetComponentInChildren<Text>().text = "Time taken: " + ((int)(Time.time - startTime)).ToString() + " seconds";
+			victoryScreen.SetActive(true);
+		}
+		else
+		{
+			lossScreen.GetComponentInChildren<Text>().text = "Time taken: " + ((int)(Time.time - startTime)).ToString() + " seconds";
+			lossScreen.SetActive(true);
+		}
     }
+
+	public void ClearRender()
+	{
+		statisticsRecorder.Reset();
+	}
 
 	public static void SwapBase(BasePiece b, Player originalPlayer, Player newPlayer)
 	{
 		b.Reset(newPlayer);
 		newPlayer.AddBase(b);
 		originalPlayer.RemoveBase(b);
+	}
+
+	public void Quit()
+	{
+		Application.Quit();
 	}
 }

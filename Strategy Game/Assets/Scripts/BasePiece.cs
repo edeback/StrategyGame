@@ -176,6 +176,7 @@ public class BasePiece : GamePiece
 					destructionAmount[key] -= 1;
 				}
 				RemoveUnusedDestructionKeys();
+				AudioManager.manager.onBaseRepaired();
 			}
 			else if(baseLevel < MaxBaseLevel)
 			{
@@ -188,6 +189,11 @@ public class BasePiece : GamePiece
 					upgradeProgress = 0;
 					baseLevel++;
 					representation.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f) * (baseLevel + 1) / 2;
+					AudioManager.manager.onBaseUpgraded();
+				}
+				else
+				{
+					AudioManager.manager.onBaseUpgraded(0.3f);
 				}
 			}
 			else
@@ -197,6 +203,7 @@ public class BasePiece : GamePiece
 		}
 		else
 		{
+			AudioManager.manager.onUnitDeath();
 			other.destroyed = true;
 			var addDestruction = true;
 			if(owner.isNeutral)
@@ -239,6 +246,7 @@ public class BasePiece : GamePiece
 						{
 							Debug.Log("Transferring base ownership!");
 							Player neutralPlayer = GameManager.manager.GetNeutralPlayer();
+							AudioManager.manager.onBaseDestroyed();
 							if (owner == neutralPlayer)
 							{
 								GameManager.SwapBase(this, owner, other.owner);

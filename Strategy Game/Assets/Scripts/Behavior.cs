@@ -63,6 +63,11 @@ public class Behavior {
 					unit.SetDestination(b.GetRandomPointAroundBase());
 				}
 			}
+			else if(unit.CurrentBehavior == UnitPiece.UnitBehavior.Defending)
+			{
+				// Reset defending units
+				unit.CurrentBehavior = UnitPiece.UnitBehavior.Stopped;
+			}
 		}
 	}
 
@@ -70,25 +75,52 @@ public class Behavior {
 	{
 		if (attackedBases.Count > 0)
 		{
-			BasePiece attackedBase = null;
-			int mostAttackingPieces = 0;
-			foreach (var pair in attackedBases)
+			var basePriority = BehaviorUtility.SortByBaseValue(attackedBases.Keys);
+			foreach(var b in basePriority)
 			{
-				if (pair.Value > mostAttackingPieces)
+				int numEnemies = attackedBases[b];
+				int numSent = 0;
+				var friendlyUnits = BehaviorUtility.GetFriendlyUnitDistances(player, b.GetPosition());
+				foreach(var unit in friendlyUnits)
 				{
-					mostAttackingPieces = pair.Value;
-					attackedBase = pair.Key;
+					if(unit.Key.CurrentBehavior != UnitPiece.UnitBehavior.Defending)
+					{
+						if(unit.Key.CurrentLocation != b)
+						{
+							unit.Key.SetDestination(b.GetRandomPointAroundBase());
+						}
+						unit.Key.CurrentBehavior = UnitPiece.UnitBehavior.Defending;
+						++numSent;
+					}
+					if (numSent >= numEnemies)
+						break;
 				}
-			}
 
-			if (attackedBase != null)
-			{
-				foreach (var unit in player.ReadUnits())
-				{
-					if(unit.CurrentLocation != attackedBase)
-						unit.SetDestination(attackedBase.GetRandomPointAroundBase());
-				}
+				//				var friendlyBases = BehaviorUtility.GetFriendlyBaseDistances(player, b.GetPosition());
+				//				foreach (var basePairs in friendlyBases)
+				//				{
+				//					foreach (UnitPiece unit in basePairs.Key.UnitsInOrbit.ToArray())
+				//					{
+				//						if(unit.CurrentBehavior == UnitPiece.UnitBehavior.Stopped)
+				//						{
+				//							if(unit.CurrentLocation != b)
+				//							{
+				//								unit.SetDestination(b.GetRandomPointAroundBase());
+				//							}
+				//							else
+				//							{
+				//								unit.CurrentBehavior = UnitPiece.UnitBehavior.Defending;
+				//							}
+				//							++numSent;
+				//						}
+				//						if (numSent >= numEnemies)
+				//							break;
+				//					}
+				//					if (numSent >= numEnemies)
+				//						break;
+				//				}
 			}
+			
 			return true;
 		}
 		return false;

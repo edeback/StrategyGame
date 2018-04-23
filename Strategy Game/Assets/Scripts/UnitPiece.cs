@@ -12,6 +12,7 @@ public class UnitPiece : GamePiece
 	{
 		Stopped,
 		Moving,
+		Defending,
 		Upgrading,
 		Repairing,
 		Attacking
@@ -93,21 +94,25 @@ public class UnitPiece : GamePiece
 	// Update is called once per frame
 	public override void Update(float deltaTime)
 	{
-		if (currentBehavior == UnitBehavior.Stopped)
+		// Orbit if at a location
+		if (CurrentLocation != null)
 		{
-			if (CurrentLocation != null)
-			{
-                // If too close, push out a bit
-                Vector2 outVector = GetPosition() - CurrentLocation.GetPosition();
-                if (Vector2.SqrMagnitude(outVector) < CurrentLocation.OrbitDistance * CurrentLocation.OrbitDistance)
-                {
-                    representation.transform.position += new Vector3(outVector.x, outVector.y, 0) / 15;
-                }
-				// Orbit
-				representation.transform.RotateAround(CurrentLocation.GetPosition(), Vector3.forward, 60 * deltaTime);
-			}
-			return;
+            // If too close, push out a bit
+            Vector2 outVector = GetPosition() - CurrentLocation.GetPosition();
+            if (Vector2.SqrMagnitude(outVector) < CurrentLocation.OrbitDistance * CurrentLocation.OrbitDistance)
+            {
+                representation.transform.position += new Vector3(outVector.x, outVector.y, 0) / 15;
+            }
+			// Orbit
+			representation.transform.position = RotatePoint(representation.transform.position, CurrentLocation.GetPosition(), deltaTime * Mathf.PI / 3);
+
+			if (currentBehavior == UnitBehavior.Defending)
+				return;
 		}
+
+		if (currentBehavior == UnitBehavior.Stopped)
+			return;
+
 		//destination = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 		// Move toward the destination if we aren't already at it
 		if (Vector3.Distance(representation.transform.position, this.destination) < MovementRate * deltaTime)
@@ -141,6 +146,7 @@ public class UnitPiece : GamePiece
 
 	public override void DidCollide(GamePiece other)
 	{
+		AudioManager.manager.onUnitDeath();
 		other.destroyed = true;
 		destroyed = true;
 		Debug.Assert(other.GetType() != typeof(BasePiece));
@@ -150,5 +156,15 @@ public class UnitPiece : GamePiece
 	{
 		base.SetIsSelected(s);
 		representation.transform.GetChild(0).GetComponent<SpriteRenderer>().enabled = s;
+	}
+
+	Vector3 RotatePoint(Vector3 vec, Vector2 position, float rad)
+	{
+		Vector3 resultVec = new Vector3(0, 0, vec.z);
+		float cosA = Mathf.Cos(rad);
+		float sinA = Mathf.Sin(rad);
+		resultVec.x = position.x + cosA * (vec.x - position.x) - sinA * (vec.y - position.y);
+		resultVec.y = position.y + sinA * (vec.x - position.x) + cosA * (vec.y - position.y);
+		return resultVec;
 	}
 }

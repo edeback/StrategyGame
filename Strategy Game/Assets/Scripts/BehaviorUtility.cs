@@ -208,6 +208,22 @@ public class BehaviorUtility
 		return baseInfo;
 	}
 
+	public static List<KeyValuePair<UnitPiece, float>> GetFriendlyUnitDistances(Player player, Vector2 startLocation)
+	{
+		List<KeyValuePair<UnitPiece, float>> unitDistances = new List<KeyValuePair<UnitPiece, float>>();
+
+		foreach(UnitPiece unit in player.ReadUnits())
+		{
+			unitDistances.Add(new KeyValuePair<UnitPiece, float>(unit, Vector2.Distance(unit.GetPosition(), startLocation)));
+		}
+		unitDistances.Sort(delegate(KeyValuePair<UnitPiece, float> x, KeyValuePair<UnitPiece, float> y)
+		{
+			return x.Value.CompareTo(y.Value);
+		});
+
+		return unitDistances;
+	}
+
 	public static List<KeyValuePair<BasePiece, float>> GetFriendlyBaseDistances(Player player, Vector2 startLocation)
 	{
 		List<KeyValuePair<BasePiece, float>> baseDistances = new List<KeyValuePair<BasePiece, float>>();
@@ -279,5 +295,34 @@ public class BehaviorUtility
 
 		return total;
 	}
+
+
+	public static List<BasePiece> SortByBaseValue(IEnumerable<BasePiece> bases)
+	{
+		List<BasePiece> baseList = new List<BasePiece>();
+
+		foreach(var b in bases)
+		{
+			if(baseList.Count == 0)
+			{
+				baseList.Add(b);
+			}
+			else
+			{
+				for(int i = 0; i < baseList.Count; ++i)
+				{
+					if(baseList[i].BaseLevel < b.BaseLevel)
+					{
+						baseList.Insert(i, b);
+						break;
+					}
+				}
+			}
+		}
+
+		return baseList;
+	}
+
+
 
 }
